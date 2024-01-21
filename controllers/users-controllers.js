@@ -1,9 +1,11 @@
-import HttpError from "../models/http-error.js";
-import User from "../models/users-model.js";
-
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import { config } from "dotenv";
+
+import HttpError from "../models/http-error.js";
+import User from "../models/users-model.js";
+import Task from "../models/tasks-model.js";
 
 config();
 
@@ -75,4 +77,33 @@ async function loginUser(req, res, next) {
   res.json({ message: "User logged in", token: token });
 }
 
-export { getUsers, signUpUser, loginUser };
+async function deleteUser(req, res, next) {
+  const { userId } = req.params;
+
+  let user;
+  try {
+    user = await User.findById(userId).populate("tasks");
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Could not delete user, try again later", 500));
+  }
+
+  if (!user) return next(new HttpError("User Id not found", 400));
+
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    await user.deleteOne({ session: session });
+    user.tasks.map(async (task) => await Task.findByIdAndDelete(task._id));
+
+    await session.commitTransaction();
+
+    res.json({ message: "The user and all related places were deleted." });
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Could not delete user, try again later", 500));
+  }
+}
+
+export { getUsers, signUpUser, loginUser, deleteUser };

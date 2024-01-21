@@ -13,6 +13,6 @@ router.post("/signup", usersController.signUpUser);
 router.post("/login", usersController.loginUser);
 
 //DELETING A USER
-// router.delete("/userId");
+router.delete("/:userId", usersController.deleteUser);
 
 export default router;
