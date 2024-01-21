@@ -1,9 +1,15 @@
 import express from "express";
+import * as usersController from "../controllers/users-controllers.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json("users routes works");
-});
+//GET A LIST OF USERS
+router.get("/", usersController.getUsers);
+
+//SIGN UP A USER
+router.post("/signup", usersController.signUpUser);
+
+//LOGIN A USER
+router.post("/login", usersController.loginUser);
 
 export default router;
