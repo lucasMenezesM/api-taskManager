@@ -1,6 +1,5 @@
 import passport from "passport";
 import { config } from "dotenv";
-// import User from "./models/users-model.js";
 import User from "../models/users-model.js";
 
 config();
