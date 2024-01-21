@@ -22,12 +22,12 @@ async function signUpUser(req, res, next) {
 
   let user;
   try {
-    user = await User.find({ email: email });
+    user = await User.findOne({ email: email });
   } catch (err) {
     next(new HttpError("Creating user failed", 500));
   }
-  console.log(user);
-  if (user.length > 0) return next(new HttpError("User already created", 400));
+
+  if (user) return next(new HttpError("User already created", 400));
 
   const hash = bcrypt.hashSync(password, 10);
 
@@ -70,9 +70,9 @@ async function loginUser(req, res, next) {
 
   if (!match) return next(new HttpError("Invalid credentials", 400));
 
-  const token = jwt.sign({ userId: newUser.id }, process.env.privateKey);
+  const token = jwt.sign({ userId: user.id }, process.env.privateKey);
 
-  res.json({ message: "User logged in" }, { token: token });
+  res.json({ message: "User logged in", token: token });
 }
 
 export { getUsers, signUpUser, loginUser };

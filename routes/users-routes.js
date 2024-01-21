@@ -12,4 +12,7 @@ router.post("/signup", usersController.signUpUser);
 //LOGIN A USER
 router.post("/login", usersController.loginUser);
 
+//DELETING A USER
+// router.delete("/userId");
+
 export default router;
