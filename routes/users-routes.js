@@ -1,5 +1,7 @@
 import express from "express";
+
 import * as usersController from "../controllers/users-controllers.js";
+import requireAuth from "../authentication/passport-config.js";
 
 const router = express.Router();
 
@@ -13,6 +15,6 @@ router.post("/signup", usersController.signUpUser);
 router.post("/login", usersController.loginUser);
 
 //DELETING A USER
-router.delete("/:userId", usersController.deleteUser);
+router.delete("/:userId", requireAuth, usersController.deleteUser);
 
 export default router;
