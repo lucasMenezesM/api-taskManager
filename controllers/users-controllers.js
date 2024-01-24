@@ -48,6 +48,7 @@ async function signUpUser(req, res, next) {
     res.status(201).json({
       message: "User created",
       user: {
+        id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         tasks: newUser.tasks,
@@ -84,6 +85,7 @@ async function loginUser(req, res, next) {
     message: "User logged in",
     token: token,
     user: {
+      id: user.id,
       name: user.name,
       email: user.email,
       tasks: user.tasks,
