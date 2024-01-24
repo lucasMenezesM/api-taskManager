@@ -47,7 +47,7 @@ async function signUpUser(req, res, next) {
 
     res
       .status(201)
-      .json({ message: "User created" }, { user: newUser }, { token: token });
+      .json({ message: "User created", user: newUser, token: token });
   } catch (err) {
     console.log(err);
     next(new HttpError("Creating user failed", 500));
@@ -74,7 +74,7 @@ async function loginUser(req, res, next) {
 
   const token = jwt.sign({ userId: user.id }, process.env.privateKey);
 
-  res.json({ message: "User logged in", token: token });
+  res.json({ message: "User logged in", token: token, user: user });
 }
 
 async function deleteUser(req, res, next) {
