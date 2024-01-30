@@ -3,6 +3,23 @@ import User from "../models/users-model.js";
 import Task from "../models/tasks-model.js";
 import mongoose from "mongoose";
 
+// GETTING TASK BY ITS ID
+async function getTaskById(req, res, next) {
+  const { taskId } = req.params;
+
+  let task;
+  try {
+    task = await Task.findById(taskId);
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Could not retrieve task. Try again later", 500));
+  }
+
+  if (!task) return next(new HttpError("Task id not found", 404));
+
+  res.json({ task: task });
+}
+
 // GETTING ALL TASKS BY USER ID
 async function getTasksByUserId(req, res, next) {
   const { userId } = req.params;
@@ -27,19 +44,19 @@ async function getTasksByUserId(req, res, next) {
 //*todo INCLUDE TASK CREATED IN THE TASK LIST OF THE USER
 // CREATING NEW TASK
 async function createTask(req, res, next) {
-  const { name, description, user_id } = req.body;
+  const { title, description, user_id } = req.body;
 
   let user;
   try {
     user = await User.findById(user_id);
   } catch (err) {
-    next(new HttpError("Could not create this task, try again later", 500));
+    next(new HttpError("Could not create this task, try again later...", 500));
   }
 
   if (!user) return next(new HttpError("User Id not found", 400));
 
   const newTask = new Task({
-    name,
+    title,
     description,
     creation_date: new Date(),
     user_id,
@@ -60,24 +77,39 @@ async function createTask(req, res, next) {
   } catch (err) {
     console.log(err);
     return next(
-      new HttpError("Could not create this task, try again later", 500)
+      new HttpError("Could not create this task, try again laterrrr.", 500)
     );
   }
 }
 
 async function updateTask(req, res, next) {
   const { taskId } = req.params;
-  const { name, description } = req.body;
+  // const { title, description } = req.body;
+
+  let task;
+  try {
+    task = await Task.findById(taskId);
+  } catch (err) {
+    console.log(err);
+  }
+
+  let result;
 
   try {
-    const result = await Task.findByIdAndUpdate(taskId, {
-      name: name,
-      description: description,
-    });
+    if (Object.keys(req.body).length === 0) {
+      result = await Task.findByIdAndUpdate(taskId, {
+        completed: !task.completed,
+      });
+    } else {
+      result = await Task.findByIdAndUpdate(taskId, {
+        title: req.body.title,
+        description: req.body.description,
+      });
+    }
 
     if (!result) return next(new HttpError("Taks Id not found", 404));
 
-    res.json({ message: "Place updated" });
+    res.json({ message: "task updated!", task: task });
   } catch (err) {
     console.log(err);
     return next(
@@ -121,4 +153,4 @@ async function deleteTask(req, res, next) {
   }
 }
 
-export { getTasksByUserId, createTask, updateTask, deleteTask };
+export { getTasksByUserId, createTask, updateTask, deleteTask, getTaskById };

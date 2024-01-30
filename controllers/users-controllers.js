@@ -19,6 +19,23 @@ async function getUsers(req, res, next) {
   }
 }
 
+async function getUserById(req, res, next) {
+  const { userId } = req.params;
+
+  let user;
+  try {
+    user = await User.findOne({ _id: userId }, "-password");
+  } catch (err) {
+    return next(
+      new HttpError("Something went wrong, could not find user.", 500)
+    );
+  }
+
+  if (!user) return next(new HttpError("Could not find this user", 404));
+
+  res.json({ user: user });
+}
+
 async function signUpUser(req, res, next) {
   const { name, email, password } = req.body;
 
@@ -122,4 +139,4 @@ async function deleteUser(req, res, next) {
   }
 }
 
-export { getUsers, signUpUser, loginUser, deleteUser };
+export { getUsers, signUpUser, loginUser, deleteUser, getUserById };

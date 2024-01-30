@@ -14,6 +14,9 @@ router.post("/signup", usersController.signUpUser);
 //LOGIN A USER
 router.post("/login", usersController.loginUser);
 
+// GETTING A USER BY ID
+router.get("/:userId", usersController.getUserById);
+
 //DELETING A USER
 router.delete("/:userId", requireAuth, usersController.deleteUser);
 
