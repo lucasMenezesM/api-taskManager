@@ -20,4 +20,7 @@ router.get("/:userId", usersController.getUserById);
 //DELETING A USER
 router.delete("/:userId", requireAuth, usersController.deleteUser);
 
+//Updating user information
+router.patch("/:userId", requireAuth, usersController.updateUser);
+
 export default router;

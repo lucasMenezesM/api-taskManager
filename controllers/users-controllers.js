@@ -9,6 +9,8 @@ import Task from "../models/tasks-model.js";
 
 config();
 
+const salt = 10;
+
 async function getUsers(req, res, next) {
   try {
     const result = await User.find({}, "-password");
@@ -48,7 +50,7 @@ async function signUpUser(req, res, next) {
 
   if (user) return next(new HttpError("User already created", 400));
 
-  const hash = bcrypt.hashSync(password, 10);
+  const hash = bcrypt.hashSync(password, salt);
 
   const newUser = new User({
     name,
@@ -92,7 +94,7 @@ async function loginUser(req, res, next) {
 
   if (!user) return next(new HttpError("Invalid credentials", 400));
 
-  const match = bcrypt.compareSync(password, user.password);
+  const match = await bcrypt.compare(password, user.password);
 
   if (!match) return next(new HttpError("Invalid credentials", 400));
 
@@ -139,4 +141,53 @@ async function deleteUser(req, res, next) {
   }
 }
 
-export { getUsers, signUpUser, loginUser, deleteUser, getUserById };
+async function updateUser(req, res, next) {
+  const { userId } = req.params;
+
+  const { name, email, newPassword, confirmPassword } = req.body;
+
+  let user;
+  try {
+    user = await User.findOne({ _id: userId });
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Something went wrong. Try again later", 500));
+  }
+
+  if (!user) return next(new HttpError("Could not find user", 500));
+
+  const match = await bcrypt.compare(confirmPassword, user.password);
+
+  if (!match) return next(new HttpError("Invalid password", 401));
+
+  let result;
+  try {
+    if (newPassword.length > 0) {
+      const hash = bcrypt.hashSync(newPassword, salt);
+
+      result = await User.findByIdAndUpdate(user._id, {
+        name,
+        email,
+        password: hash,
+      });
+    } else {
+      result = await User.findByIdAndUpdate(user._id, {
+        name,
+        email,
+      });
+    }
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Could not update user data. Try again later.", 500)
+    );
+  }
+
+  res.json({
+    message: "user data updated successfully",
+    user: { name: user.name, email: user.email, id: user._id },
+  });
+}
+
+export { getUsers, signUpUser, loginUser, deleteUser, getUserById, updateUser };
